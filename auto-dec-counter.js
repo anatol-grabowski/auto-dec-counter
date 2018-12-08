@@ -41,7 +41,7 @@ class AutoDecCounter {
 
   async waitUpdate() {
     return new Promise((resolve) => {
-      this._events.on('value', resolve)
+      this._events.once('value', resolve)
     })
   }
 }
