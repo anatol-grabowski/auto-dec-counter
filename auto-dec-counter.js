@@ -4,40 +4,44 @@ const debug = require('debug')('auto-dec-counter:debug')
 
 class AutoDecCounter {
   constructor(decIntervalMs=3000) {
-    this.counter = 0
+    this.value = 0
     this.decIntervalMs = decIntervalMs
-    this.timerRunning = false
-    this.events = new EventEmitter()
+    this._timerRunning = false
+    this._events = new EventEmitter()
   }
 
-  inc(value) {
-    this.counter += value
-    debug('inc', value, 'new value', this.counter)
-    this.startDecTimer()
+  get value() {
+    return this._value
   }
 
-  dec(value) {
-    this.counter -= Math.max(value, 0)
-    debug('dec', value, 'new value', this.counter)
-    this.events.emit('dec', this.counter)
+  set value(val) {
+    this._value = val
+    debug('set value', this._value)
+    this._startDecTimer()
+    this._events.emit('value')
   }
 
-  async startDecTimer() {
-    if (this.timerRunning) return
-    this.timerRunning = true
-    while (this.counter > 0) {
+  inc(incVal) {
+    this.value += incVal
+  }
+
+  dec(decVal) {
+    this.value -= Math.max(decVal, 0)
+  }
+
+  async _startDecTimer() {
+    if (this._timerRunning) return
+    this._timerRunning = true
+    while (this._value > 0) {
       await sleep(this.decIntervalMs)
       this.dec(1)
     }
-    this.timerRunning = false
+    this._timerRunning = false
   }
 
-  async waitDropTo(value=10) {
-    if (this.counter <= value) return
+  async waitUpdate() {
     return new Promise((resolve) => {
-      this.events.on('dec', counter => {
-        if (counter <= value) resolve()
-      })
+      this._events.on('value', resolve)
     })
   }
 }
