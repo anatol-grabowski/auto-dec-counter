@@ -4,7 +4,7 @@ const debug = require('debug')('auto-dec-counter:debug')
 
 class AutoDecCounter {
   constructor(decIntervalMs=3000) {
-    this.value = 0
+    this._value = 0
     this.decIntervalMs = decIntervalMs
     this._timerRunning = false
     this._events = new EventEmitter()
